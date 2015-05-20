@@ -3,10 +3,15 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var port = process.env.PORT || 3000;
+var redis = require('socket.io-redis');
+var socketport = process.env.PORT || 3000;
+var redisserver = process.env.REDIS || '127.0.0.1';
+var redisport = process.env.REDISPORT || 6379;
 
-server.listen(port, function () {
-  console.log('Server listening at port %d', port);
+io.adapter(redis({ host: redisserver, port: redisport }));
+
+server.listen(socketport, function () {
+  console.log('Server listening at port %d', socketport);
 });
 
 // Routing
@@ -36,6 +41,7 @@ io.on('connection', function (socket) {
     socket.username = username;
     // add the client's username to the global list
     usernames[username] = username;
+    console.log("add user " + numUsers + username);
     ++numUsers;
     addedUser = true;
     socket.emit('login', {
