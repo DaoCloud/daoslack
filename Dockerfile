@@ -6,6 +6,6 @@ ADD . /code
 RUN npm install
 RUN npm install forever -g
 
-EXPOSE 3100
+EXPOSE 3000
 
 CMD [ "forever", "index.js" ]
