@@ -5,10 +5,13 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var redis = require('socket.io-redis');
 var socketport = process.env.PORT || 3000;
-var redisserver = process.env.REDIS || '127.0.0.1';
+var redisserver = process.env.REDIS;
 var redisport = process.env.REDISPORT || 6379;
 
+if (redisserver) {
 io.adapter(redis({ host: redisserver, port: redisport }));
+console.log('Redis enabled at ' +  redisserver + redisport);
+}
 
 server.listen(socketport, function () {
   console.log('Server listening at port %d', socketport);
