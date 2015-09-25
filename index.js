@@ -3,14 +3,21 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var redis = require('socket.io-redis');
+var redisAdapter = require('socket.io-redis');
 var socketport = process.env.PORT || 3000;
-var redisserver = process.env.REDIS;
-var redisport = process.env.REDISPORT || 6379;
+// var redisserver = process.env.REDIS;
+// var redisport = process.env.REDISPORT || 6379;
 
-if (redisserver) {
-io.adapter(redis({ host: redisserver, port: redisport }));
-console.log('Redis enabled at ' +  redisserver + redisport);
+if(process.env.REDIS_PORT_6379_TCP_ADDR){
+  if (process.env.REDIS_PASSWORD) {
+    var redis = require('redis').createClient;
+    var pub = redis(process.env.REDIS_PORT || 6379, process.env.REDIS_PORT_6379_TCP_ADDR, { auth_pass: process.env.REDIS_PASSWORD });
+    var sub = redis(process.env.REDIS_PORT || 6379, process.env.REDIS_PORT_6379_TCP_ADDR, { detect_buffers: true, auth_pass: process.env.REDIS_PASSWORD });
+    io.adapter(redisAdapter({ pubClient: pub, subClient: sub }));
+  }else{
+    io.adapter(redisAdapter({ host: process.env.REDIS_PORT_6379_TCP_ADDR, port: process.env.REDIS_PORT || 6379 }));
+  }
+  console.log('Redis enabled at ' +  process.env.REDIS_PORT_6379_TCP_ADDR + process.env.REDIS_PORT);
 }
 
 server.listen(socketport, function () {
